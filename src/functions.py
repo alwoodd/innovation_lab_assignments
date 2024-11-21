@@ -114,3 +114,25 @@ def activities_to_rows(activities, dict_row_manager):
         for i in range(0, len(students)):
             row_dict = dict_row_manager.get_row(i)
             row_dict[activity.name] = students[i].first_name + " " + students[i].last_name
+
+def write_output_sheet(sheet_rec: SheetRec, output_dir: str):
+    '''
+    Write passed sheet_rec to a csv file named "assignment_<day>".
+    For example, if sheet_rec.day is Monday, the file name will be
+    assignment_Monday.csv.
+    Args:
+        sheet_rec ([SheetRec])
+        output_dir (str): Directory name to prepend to file name.
+    '''
+    csv_name = output_dir + "assignment_" + sheet_rec.day + ".csv"
+    activity_field_names = [activity.name for activity in sheet_rec.activities]
+
+    dict_row_manager = DictRowManager(activity_field_names)
+    activities_to_rows(sheet_rec.activities, dict_row_manager)
+
+    with open(csv_name, "w", newline="") as csv_file:
+        # Ignore PyCharm's goofy 'Expected type SupportsWrite[str]'. The code works fine as-is.
+        # noinspection PyTypeChecker
+        csv_writer = csv.DictWriter(csv_file, activity_field_names)
+        csv_writer.writeheader()
+        csv_writer.writerows(dict_row_manager.get_all_rows())

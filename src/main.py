@@ -41,19 +41,10 @@ for sheet_rec in sheet_recs:
                 # Else activity cap has been reached.
                 break #for priority loop
 
-
+'''
+Output a sheet CSV for every sheet_rec.
+'''
 for sheet_rec in sheet_recs:
-    csv_name = output_dir + "assignment_" + sheet_rec.day + ".csv"
-    activity_field_names = [activity.name for activity in sheet_rec.activities]
-
-    dict_row_manager = DictRowManager(activity_field_names)
-    activities_to_rows(sheet_rec.activities, dict_row_manager)
-
-    with open(csv_name, "w", newline="") as csv_file:
-        # Ignore PyCharm's goofy 'Expected type SupportsWrite[str]'. The code works fine as-is.
-        # noinspection PyTypeChecker
-        csv_writer = csv.DictWriter(csv_file, activity_field_names)
-        csv_writer.writeheader()
-        csv_writer.writerows(dict_row_manager.get_all_rows())
+    write_output_sheet(sheet_rec, output_dir)
 
 print("done")
