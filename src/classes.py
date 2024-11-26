@@ -1,3 +1,5 @@
+import argparse
+import logging
 import sys
 from datetime import datetime
 
@@ -130,3 +132,47 @@ class DictRowManager:
         Return the managed list of rows.
         '''
         return self._rows
+
+class Config:
+    '''
+    Parses the command line args, then stores them as an instance of Config.
+    '''
+    input_file = "input_file"
+    output_dir = "output_dir"
+    config_filename = "c"
+
+    def _log_me(self):
+        logging.info(Config.input_file + ":" + self.input_file)
+        logging.info(Config.output_dir + ":" + self.output_dir)
+        logging.info(Config.config_filename + ":" + self.config_json)
+
+    @staticmethod
+    def parse_cmd_line_args():
+        '''
+        Static method that sets up and uses argparse to get expected config info.
+        Returns:
+             Config: instance of Config
+        '''
+        arg_parser = argparse.ArgumentParser(prog="innovation_lab_assignments",
+                                             description="Reads in CSV file of Google Form responses, and writes out a CSV file for every day and activity configured in daily_activities_config.json.")
+        arg_parser.add_argument(Config.input_file, metavar="<input file>", help="Name of CSV file with form responses")
+        arg_parser.add_argument(Config.output_dir, metavar="<output directory>",
+                                help="Directory that the assignment_<day>.csv files are written.")
+        arg_parser.add_argument("-" + Config.config_filename, help="Configuration file. Defaults to daily_activities_config.json.",
+                                default="daily_activities_config.json",
+                                metavar="JSON file")
+        args_namespace = arg_parser.parse_args()
+        args_dict = vars(args_namespace) #Convert to dict
+        instance = Config(args_dict)
+        instance._log_me()
+        return instance
+
+    def __init__(self, args_dict: dict):
+        '''
+        Initialize Config
+        Args:
+            args_dict (dict): dict with expected arg values
+        '''
+        self.input_file = args_dict[Config.input_file]
+        self.output_dir = args_dict[Config.output_dir]
+        self.config_json = args_dict[Config.config_filename]

@@ -1,0 +1,66 @@
+{
+    "sheets":
+    [
+        {"sheet" :{
+            "day" : "Monday",
+            "activities" : [
+                {"activity": "Athletics","cap" : "no cap"},
+                {"activity": "Genius Grant","cap" : 8},
+                {"activity": "Student Support","cap" : "no cap"},
+                {"activity": "Serving Seniors","cap" : 14},
+                {"activity": "Cricut Crafts","cap" : 8},
+                {"activity": "Science Fair","cap" : "no cap"},
+                {"activity": "College Essays", "cap": 12},
+                {"activity": "SAT/ACT Prep", "cap": 15},
+                {"activity": "Ping Pong", "cap": 8}
+            ]
+        }
+        },
+        {"sheet" : {
+            "day" : "Tuesday",
+            "activities" : [
+                {"activity": "Genius Grant","cap" : 8},
+                {"activity": "Athletics","cap" : "no cap"},
+                {"activity": "Wood Working", "cap": 8},
+                {"activity": "Robotics", "cap": "no cap"},
+                {"activity": "Graphic Signs", "cap": 10},
+                {"activity": "Praise Team", "cap": "no cap"},
+                {"activity": "Classic Vehicle Restoration", "cap": 8},
+                {"activity": "Morning Announcements", "cap": 4},
+                {"activity": "Basketball Training", "cap": 25}
+                ]
+        }
+        },
+        {"sheet" : {
+            "day" : "Wednesday",
+            "activities" : [
+                {"activity": "Athletics","cap" : "no cap"},
+                {"activity": "Genius Grant","cap" : 8},
+                {"activity": "Student Support","cap" : "no cap"},
+                {"activity": "Serving Seniors","cap" : 14},
+                {"activity": "Cricut Crafts","cap" : 8},
+                {"activity": "Science Fair","cap" : "no cap"},
+                {"activity": "Praise Team", "cap": "no cap"},
+                {"activity": "Theater Basics", "cap": "no cap"},
+                {"activity": "STUCO", "cap": "no cap"},
+                {"activity": "Yoga", "cap": 15}
+                ]
+        }
+        },
+        {"sheet" : {
+            "day" : "Thursday",
+            "activities" : [
+                {"activity": "Athletics","cap" : "no cap"},
+                {"activity": "Genius Grant","cap" : 8},
+                {"activity": "Wood Working", "cap": 8},
+                {"activity": "Robotics", "cap": "no cap"},
+                {"activity": "Morning Announcements", "cap": 4},
+                {"activity": "Journalism", "cap": 10},
+                {"activity": "Young Men's Discipleship", "cap": 12},
+                {"activity": "Basketball Training", "cap": 25},
+                {"activity": "Yearbook", "cap": 12}
+            ]
+        }
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 import random
-from classes import *
+from src.classes import *
 
 _current_time = datetime.now()
 

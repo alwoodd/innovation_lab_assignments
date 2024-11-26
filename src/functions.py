@@ -1,8 +1,10 @@
-import logging
 import csv
 import json
+import os.path
 from json import JSONDecodeError
-from classes import *
+from src.classes import *
+
+PROJECT_ROOT: str = "" # Project root set by __main__.
 
 def read_input_records(filename):
     '''
@@ -38,6 +40,11 @@ def load_output_config(filename):
         dict: content of config_file_name
     """
     json_data = {}
+
+    # If filename does not have the full path name
+    if not os.path.isabs(filename):
+        filename = PROJECT_ROOT + "\\" + filename
+
     try:
         with open(filename) as input_file:
             json_data = json.load(input_file)
@@ -54,7 +61,6 @@ def create_sheets_list(sheets_dict: dict):
     Args:
         sheets_dict (dict): sheets data as a dict (see load_output_config).
     Returns: list[Sheet_Rec]
-
     '''
     sheet_recs: list[SheetRec] = []
     for sheet_dict in sheets_dict:
@@ -124,7 +130,7 @@ def write_output_sheet(sheet_rec: SheetRec, output_dir: str):
         sheet_rec ([SheetRec])
         output_dir (str): Directory name to prepend to file name.
     '''
-    csv_name = output_dir + "assignment_" + sheet_rec.day + ".csv"
+    csv_name = output_dir + "/assignment_" + sheet_rec.day + ".csv"
     activity_field_names = [activity.name for activity in sheet_rec.activities]
 
     dict_row_manager = DictRowManager(activity_field_names)
