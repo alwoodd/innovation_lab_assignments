@@ -3,7 +3,7 @@ from unittest import TestCase
 from classes import *
 import datetime
 
-class TestStudent(TestCase):
+class ClassTests(TestCase):
     def test_Student_init(self):
         student_dict = {'I am currently participating in at least one LHS sport.': 'No',
                         'I understand that disciplinary issues could result in not receiving credit for Innovation Lab.': "I understand",
@@ -15,7 +15,7 @@ class TestStudent(TestCase):
                         'Timestamp': '10/28/2024 17:50:32',
                         'Type your first name': 'Scott', 'Type your last name': 'Mitchell'}
         # Create a student
-        student: Student = Student(student_dict)
+        student: Student = Student(student_dict, 10)
 
         self.assertEqual(student.first_name, "Scott")
         self.assertEqual(student.last_name, "Mitchell")
@@ -27,6 +27,7 @@ class TestStudent(TestCase):
         self.assertEqual(student.in_athletics, False)
         self.assertEqual(student.credit_agreement, True)
         self.assertEqual(student.effort_agreement, True)
+        self.assertEqual(student.student_id, 10)
 
     def _test_student_choices(self, choices: [Choice], choice_names: [str]):
         choice_item = 0

@@ -1,10 +1,15 @@
 {
+    "activity_weight_factors":
+    [
+        {"activity": "Athletics", "weight_factor" :  0.00001},
+        {"activity": "Foo", "weight_factor" :  50}
+    ],
     "sheets":
     [
         {"sheet" :{
             "day" : "Monday",
             "activities" : [
-                {"activity": "Athletics","cap" : "no cap"},
+                {"activity": "Athletics","cap" : 3},
                 {"activity": "Genius Grant","cap" : 8},
                 {"activity": "Student Support","cap" : "no cap"},
                 {"activity": "Serving Seniors","cap" : 14},

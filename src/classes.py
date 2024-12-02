@@ -1,4 +1,3 @@
-import argparse
 import logging
 import sys
 from datetime import datetime
@@ -65,7 +64,8 @@ class Student:
         wednesday_choices ([Choice]): List of 3 choices
         thursday_choices ([Choice]): List of 3 choices
     """
-    def __init__(self, student_dict: dict):
+    def __init__(self, student_dict: dict, student_id: int):
+        self.student_id = student_id
         self.first_name = student_dict["Type your first name"]
         self.last_name = student_dict["Type your last name"]
         self.in_athletics = True if student_dict["I am currently participating in at least one LHS sport."] == "Yes" else False
@@ -134,45 +134,109 @@ class DictRowManager:
         return self._rows
 
 class Config:
-    '''
-    Parses the command line args, then stores them as an instance of Config.
-    '''
-    input_file = "input_file"
-    output_dir = "output_dir"
-    config_filename = "c"
+    """
+    Exposes configurable items.
+    This class is a singleton. Use Config.get_instance() to get the single instance.
+    """
+    _instance = None
+    _is_initialize_allowed = False
 
-    def _log_me(self):
-        logging.info(Config.input_file + ":" + self.input_file)
-        logging.info(Config.output_dir + ":" + self.output_dir)
-        logging.info(Config.config_filename + ":" + self.config_json)
+    def __init__(self):
+        """
+        __init__() is only allowed to be run when _is_initialize_allowed.
+        """
+        if not Config._is_initialize_allowed:
+            message = "Only one instance is allowed. Use 'create_instance'."
+            logging.error(message)
+            raise RuntimeError(message)
+        Config._is_initialize_allowed = False #No more instantiations allowed.
+        self.input_file_name: str = ""
+        self.output_dir_name: str = ""
+        self.config_json_name: str = ""
+        self.project_root: str = ""
+        self.json_data: dict = {}
+        self.weight_factor_dict = None
+        self._cmd_line_args_parsed = False
 
     @staticmethod
-    def parse_cmd_line_args():
-        '''
-        Static method that sets up and uses argparse to get expected config info.
+    def get_instance():
+        """
+        Return singleton instance. Instantiate first if needed.
         Returns:
-             Config: instance of Config
-        '''
+            Config: instance of Config
+        """
+        if Config._instance is None:
+            Config._is_initialize_allowed = True #The only allowed case of instantiation.
+            Config._instance = Config()
+        return Config._instance
+
+
+    def _log_me(self):
+        logging.info(Config.input_file_name + ":" + self.input_file_name)
+        logging.info(Config.output_dir_name + ":" + self.output_dir_name)
+        logging.info(Config.config_filename + ":" + self.config_json_name)
+
+    # Dictionary keys for parse_cmd_line_args().
+    input_file_name = "input_file"
+    output_dir_name = "output_dir"
+    config_filename = "c"
+    def parse_cmd_line_args(self):
+        import argparse
+        """
+        Set up and uses argparse to get expected config info.
+        """
         arg_parser = argparse.ArgumentParser(prog="innovation_lab_assignments",
                                              description="Reads in CSV file of Google Form responses, and writes out a CSV file for every day and activity configured in daily_activities_config.json.")
-        arg_parser.add_argument(Config.input_file, metavar="<input file>", help="Name of CSV file with form responses")
-        arg_parser.add_argument(Config.output_dir, metavar="<output directory>",
+        arg_parser.add_argument(Config.input_file_name, metavar="<input file>", help="Name of CSV file with form responses")
+        arg_parser.add_argument(Config.output_dir_name, metavar="<output directory>",
                                 help="Directory that the assignment_<day>.csv files are written.")
         arg_parser.add_argument("-" + Config.config_filename, help="Configuration file. Defaults to daily_activities_config.json.",
                                 default="daily_activities_config.json",
                                 metavar="JSON file")
         args_namespace = arg_parser.parse_args()
         args_dict = vars(args_namespace) #Convert to dict
-        instance = Config(args_dict)
-        instance._log_me()
-        return instance
+        self.input_file_name = args_dict[Config.input_file_name]
+        self.output_dir_name = args_dict[Config.output_dir_name]
+        self.config_json_name = args_dict[Config.config_filename]
 
-    def __init__(self, args_dict: dict):
-        '''
-        Initialize Config
+        self._cmd_line_args_parsed = True
+        self._log_me()
+
+    def load_config(self):
+        from src.functions import prepend_project_root_if_required
+        from json import JSONDecodeError
+        import json
+        """
+        Load sheets configuration from config_json_name JSON file into json_data.
+        """
+        if not self._cmd_line_args_parsed:
+            message = "parse_cmd_line_args() must be called first."
+            logging.error(message)
+            raise RuntimeError(message)
+        filename = prepend_project_root_if_required(self.config_json_name, self.project_root)
+
+        try:
+            with open(filename) as input_file:
+                self.json_data = json.load(input_file)
+        except FileNotFoundError:
+            logging.error("JSON config file with filename " + filename + " not found")
+        except JSONDecodeError:
+            logging.error("JSON config file" + filename + " contains invalid JSON")
+
+    def get_weight_factor(self, activity_name) -> float:
+        """
+        Return weight factor for the passed activity_name.
+        The weight factors are found in json_data, loaded by load_config().
         Args:
-            args_dict (dict): dict with expected arg values
-        '''
-        self.input_file = args_dict[Config.input_file]
-        self.output_dir = args_dict[Config.output_dir]
-        self.config_json = args_dict[Config.config_filename]
+            activity_name (str)
+        Returns:
+            float: weight factor
+        """
+        # Lazy-load weight_factor_dict.
+        if self.weight_factor_dict is None:
+            weight_factor_dict_list = self.json_data.get("activity_weight_factors")
+            #                                       Normalize activity key to lower case.
+            self.weight_factor_dict = {weight_factor_dict["activity"].lower() : weight_factor_dict["weight_factor"]
+                                       for weight_factor_dict in weight_factor_dict_list}
+
+        return self.weight_factor_dict.get(activity_name)

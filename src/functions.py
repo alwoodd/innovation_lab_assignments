@@ -1,18 +1,15 @@
 import csv
-import json
-import os.path
-from json import JSONDecodeError
+import os
 from src.classes import *
-
-PROJECT_ROOT: str = "" # Project root set by __main__.
+import logging
 
 def read_input_records(filename):
-    '''
+    """
     Read input records from a CSV file.
     Args:
         filename (str): CSV file name
     Returns: [dict]
-    '''
+    """
     input_records = []
 
     try:
@@ -24,59 +21,14 @@ def read_input_records(filename):
                 stripped_fieldnames.append(fieldname.strip())
             csv_reader.fieldnames = stripped_fieldnames
 
-            for input_record in csv_reader:
-                input_records.append(input_record)
+            input_records = [input_record for input_record in csv_reader]
     except FileNotFoundError:
         logging.error("Input records with filename " + filename + " not found")
 
     return input_records
 
-def load_output_config(filename):
-    """
-    Load sheets configuration from config_filename JSON file.
-    Args:
-        filename (str): JSON file name
-    Returns:
-        dict: content of config_file_name
-    """
-    json_data = {}
-
-    # If filename does not have the full path name
-    if not os.path.isabs(filename):
-        filename = PROJECT_ROOT + "\\" + filename
-
-    try:
-        with open(filename) as input_file:
-            json_data = json.load(input_file)
-    except FileNotFoundError:
-        logging.error("JSON config file with filename " + filename + " not found")
-    except JSONDecodeError:
-        logging.error("JSON config file" + filename + " contains invalid JSON")
-
-    return json_data
-
-def create_sheets_list(sheets_dict: dict):
-    '''
-    Create a list of Sheet_Rec from passed dict.
-    Args:
-        sheets_dict (dict): sheets data as a dict (see load_output_config).
-    Returns: list[Sheet_Rec]
-    '''
-    sheet_recs: list[SheetRec] = []
-    for sheet_dict in sheets_dict:
-        sheet_recs.append(SheetRec(sheet_dict["sheet"]))
-
-    return sheet_recs
-
-def create_students_list(students_dict_list: list) -> [Student]:
-    students: list[Student] = []
-    for student_dict in students_dict_list:
-        students.append(Student(student_dict))
-
-    return students
-
 def students_with_activity_choice(students, activity_choice, day, priority) -> [Student]:
-    '''
+    """
     Creates list of students who have activity_choice for the passed day, at the passed priority.
     Args:
         students ([Student]): students to be evaluated.
@@ -85,15 +37,15 @@ def students_with_activity_choice(students, activity_choice, day, priority) -> [
         priority (int) priority to be considered.
     Returns:
         [Student]: List of students for passed in activity.
-    '''
+    """
     student_candidates: list[Student] = []
 
     def choice_filter(choice):
-        '''
+        """
         Inner Filter Function for filter() call below.
         Return True if the passed choice's priority is the priority passed into the outer function,
         and the choice's name is the activity choice name passed into the outer function.
-        '''
+        """
         return True if choice.priority == priority and choice.name == activity_choice.name else False
 
     for student in students:
@@ -107,14 +59,37 @@ def students_with_activity_choice(students, activity_choice, day, priority) -> [
 
     return student_candidates
 
+def remove_students_already_selected(existing_activity_students: [Student], student_candidates: [Student]) -> [Student]:
+    """
+    Return a new [Student] with only student candidates that are not in existing activity students.
+    Args:
+        existing_activity_students ([Students])
+        student_candidates ([Students])
+    Returns:
+        [Student]: List of students not already in existing_activity_students.
+    """
+    # We'll use student_ids to evaluate if a student should be removed.
+    existing_student_ids: [int] = []
+    for existing_student in existing_activity_students:
+        existing_student_ids.append(existing_student.student_id)
+
+    revised_student_candidates: [Student] = []
+
+    # Add a student candidate to revised_student_candidates only if the candidate's student_id is not in existing_student_ids.
+    for student_candidate in student_candidates:
+        if student_candidate.student_id not in existing_student_ids:
+            revised_student_candidates.append(student_candidate)
+
+    return revised_student_candidates
+
 def activities_to_rows(activities, dict_row_manager):
-    '''
+    """
     For all the passed activities, for each of their respective students,
     populate each of the activity's students using the passed dict_row_manager.
     Args:
           activities ([Activity])
           dict_row_manager (DictRowManager): Instance of DictRowManager
-    '''
+    """
     for activity in activities:
         students: [Student] = activity.students
         for i in range(0, len(students)):
@@ -122,14 +97,14 @@ def activities_to_rows(activities, dict_row_manager):
             row_dict[activity.name] = students[i].first_name + " " + students[i].last_name
 
 def write_output_sheet(sheet_rec: SheetRec, output_dir: str):
-    '''
+    """
     Write passed sheet_rec to a csv file named "assignment_<day>".
     For example, if sheet_rec.day is Monday, the file name will be
     assignment_Monday.csv.
     Args:
         sheet_rec ([SheetRec])
         output_dir (str): Directory name to prepend to file name.
-    '''
+    """
     csv_name = output_dir + "/assignment_" + sheet_rec.day + ".csv"
     activity_field_names = [activity.name for activity in sheet_rec.activities]
 
@@ -142,3 +117,21 @@ def write_output_sheet(sheet_rec: SheetRec, output_dir: str):
         csv_writer = csv.DictWriter(csv_file, activity_field_names)
         csv_writer.writeheader()
         csv_writer.writerows(dict_row_manager.get_all_rows())
+
+def debug_log_randomized_students(students: [Student], day, activity):
+    logging.debug("Randomized students for " + day + ", " + activity + ":")
+    for student in students:
+        logging.debug(student.first_name + ", " + student.last_name + "\t" + str(student.timestamp))
+
+def prepend_project_root_if_required(filename: str, project_root: str) -> str:
+    """
+    If filename does not have the full path name, prepend project_root to it.
+    Args:
+        filename (str): filename to check.
+    Returns:
+        str: filename that already had a path, or filename with project_root for its path.
+    """
+    if not os.path.isabs(filename):
+        filename = project_root + "\\" + filename
+
+    return filename

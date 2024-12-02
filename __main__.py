@@ -14,9 +14,9 @@ project_root  = os.path.dirname(os.path.abspath(__file__))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-# Store this in functions for convenient later reference.
-import src.functions
-src.functions.PROJECT_ROOT = project_root
+# Store this for later use.
+from src.classes import Config
+Config.get_instance().project_root = project_root
 
 _debug("sys.path:")
 for p in sys.path:
