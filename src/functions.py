@@ -29,7 +29,8 @@ def read_input_records(filename):
 
 def students_with_activity_choice(students, activity_choice, day, priority) -> [Student]:
     """
-    Creates list of students who have activity_choice for the passed day, at the passed priority.
+    Creates list of students who have activity_choice for the passed day, at the passed priority,
+    and is_available_for_day().
     Args:
         students ([Student]): students to be evaluated.
         activity_choice (Activity): activity to be considered.
@@ -49,38 +50,23 @@ def students_with_activity_choice(students, activity_choice, day, priority) -> [
         return True if choice.priority == priority and choice.name == activity_choice.name else False
 
     for student in students:
-        # Filter all the student's choices for the day to just the passed in activity choice.
-        # This filtered list may be empty (len == 0).
-        all_student_choices = getattr(student, day + "_choices")
-        student_day_choices = list(filter(choice_filter, all_student_choices))
-        # If this student chose this activity, append to student_candidates.
-        if len(student_day_choices) > 0:
-            student_candidates.append(student)
+        if student.is_available_for_day(day):
+            # Filter all the student's choices for the day to just the passed in activity choice.
+            # This filtered list may be empty (len == 0).
+            all_student_choices = getattr(student, day + "_choices")
+            student_day_choices = list(filter(choice_filter, all_student_choices))
+            # If this student chose this activity, append to student_candidates.
+            if len(student_day_choices) > 0:
+                student_candidates.append(student)
 
     return student_candidates
 
-def remove_students_already_selected(existing_activity_students: [Student], student_candidates: [Student]) -> [Student]:
+def mark_students_selected_for_day(student_candidates, day, priority):
     """
-    Return a new [Student] with only student candidates that are not in existing activity students.
-    Args:
-        existing_activity_students ([Students])
-        student_candidates ([Students])
-    Returns:
-        [Student]: List of students not already in existing_activity_students.
+    Call set_selection_priority_for_day() for every student candidate.
     """
-    # We'll use student_ids to evaluate if a student should be removed.
-    existing_student_ids: [int] = []
-    for existing_student in existing_activity_students:
-        existing_student_ids.append(existing_student.student_id)
-
-    revised_student_candidates: [Student] = []
-
-    # Add a student candidate to revised_student_candidates only if the candidate's student_id is not in existing_student_ids.
-    for student_candidate in student_candidates:
-        if student_candidate.student_id not in existing_student_ids:
-            revised_student_candidates.append(student_candidate)
-
-    return revised_student_candidates
+    for student in student_candidates:
+        student.set_selection_priority_for_day(priority, day)
 
 def activities_to_rows(activities, dict_row_manager):
     """

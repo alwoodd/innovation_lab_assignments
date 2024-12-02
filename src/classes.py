@@ -37,6 +37,9 @@ class Activity:
         self.cap = self._convert_cap_to_int(activity_dict["cap"])
         self.students = []
 
+    def __str__(self):
+        return f"name: {self.name}, cap: {self.cap}"
+
     @staticmethod
     def _convert_cap_to_int(cap_value: str) -> int:
         """
@@ -83,7 +86,27 @@ class Student:
         self.thursday_choices = [Choice(student_dict["Thursday First Choice"], 1),
                                  Choice(student_dict["Thursday Second Choice"], 2),
                                  Choice(student_dict["Thursday Third Choice"], 3),]
+        self.day_selections = {"monday" : 0, "tuesday" : 0, "wednesday" : 0, "thursday" : 0}
         self.timestamp = datetime.strptime(student_dict["Timestamp"], "%m/%d/%Y %H:%M:%S")
+
+    def __str__(self):
+        day_selections = ""
+        keys = self.day_selections.keys()
+        for key in keys:
+            day_selections += f" day: {key}, priority: {self.day_selections[key]}"
+        return f"name: {self.first_name} {self.last_name}, in athletics? {self.in_athletics} {day_selections}"
+
+    def set_selection_priority_for_day(self, priority, day):
+        """
+        Mark at which priority the passed day was selected.
+        """
+        self.day_selections[day] = priority
+
+    def is_available_for_day(self, day):
+        """
+        Return True if the student has not yet been selected for the passed day.
+        """
+        return True if self.day_selections[day] == 0 else False
 
 class Choice:
     '''
@@ -95,6 +118,9 @@ class Choice:
     def __init__(self, name: str, priority: int):
         self.name = name
         self.priority = priority
+
+    def __str__(self):
+        return f"name: {self.name}, priority: {self.priority}"
 
 class DictRowManager:
     '''

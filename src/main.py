@@ -30,14 +30,12 @@ def main():
     sheet_recs = [SheetRec(sheet_dict["sheet"]) for sheet_dict in config.json_data.get("sheets")]
 
     for sheet_rec in sheet_recs:
-        for activity in sheet_rec.activities:
-            # For each activity, iterate up to priority 3.
-            for priority in range(1, 4):
+        for priority in range(1, 4):
+            for activity in sheet_rec.activities:
                 # If activity cap has not yet been reached...
                 if len(activity.students) < activity.cap:
-                    # Get all students who want this activity at the current priority.
+                    # Get all still-available students who want this activity at the current priority.
                     student_candidates = students_with_activity_choice(students, activity, sheet_rec.day.lower(), priority)
-                    student_candidates = remove_students_already_selected(activity.students, student_candidates)
                     # If the number of student candidates exceeds the activity's remaining cap,
                     # randomize_students() using the candidates, then select from that list up to the remaining cap value,
                     # starting with beginning of the list.
@@ -49,9 +47,7 @@ def main():
                         student_candidates = student_candidates[0: remaining_cap]
 
                     activity.students.extend(student_candidates)
-                else:
-                    # Else activity cap has been reached.
-                    break #for priority loop
+                    mark_students_selected_for_day(student_candidates, sheet_rec.day.lower(), priority)
 
     '''
     Output a sheet CSV for every sheet_rec.
