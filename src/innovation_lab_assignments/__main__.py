@@ -15,7 +15,7 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 # Store this for later use.
-from src.classes import Config
+from innovation_lab_assignments.classes import Config
 Config.get_instance().project_root = project_root
 
 _debug("sys.path:")
@@ -23,6 +23,6 @@ for p in sys.path:
     _debug(p)
 
 if __name__ == "__main__":
-    from src.main import main
+    from innovation_lab_assignments.main import main
     _debug("INSIDE if")
     main()
