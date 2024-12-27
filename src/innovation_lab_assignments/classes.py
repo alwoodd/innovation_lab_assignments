@@ -172,7 +172,7 @@ class Config:
         __init__() is only allowed to be run when _is_initialize_allowed.
         """
         if not Config._is_initialize_allowed:
-            message = "Only one instance is allowed. Use 'create_instance'."
+            message = "Only one instance is allowed. Use 'get_instance()'."
             logging.error(message)
             raise RuntimeError(message)
         Config._is_initialize_allowed = False #No more instantiations allowed.
@@ -266,3 +266,9 @@ class Config:
                                        for weight_factor_dict in weight_factor_dict_list}
 
         return self.weight_factor_dict.get(activity_name)
+
+    def get_sheets(self) -> dict:
+        return self.json_data.get("sheets")
+
+    def set_sheets(self, sheets_dict: dict):
+        self.json_data["sheets"] = sheets_dict

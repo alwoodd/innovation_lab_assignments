@@ -62,6 +62,7 @@ def randomize_students(student_candidates: [Student], activity: Activity) -> [St
     Randomize the passed students.
     Args:
         student_candidates ([Student])
+        activity (Activity)
     Returns:
         [Student]: List of randomized students.
     """
@@ -70,7 +71,7 @@ def randomize_students(student_candidates: [Student], activity: Activity) -> [St
 
     students_with_weights = [(student_tuple[0], _add_activity_weight(activity, student_tuple)) for student_tuple in students_with_weights]
 
-    # Add a random value to the weights.
+    # Multiply each weight by a random value.
     students_with_weights = [(student, weight * random.random()) for student, weight in students_with_weights]
 
     # Sort the tuples by weights.

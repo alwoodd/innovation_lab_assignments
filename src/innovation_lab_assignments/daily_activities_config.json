@@ -1,39 +1,39 @@
 {
     "activity_weight_factors":
     [
-        {"activity": "Athletics", "weight_factor" :  0.00001},
-        {"activity": "Foo", "weight_factor" :  50}
+        {"activity": "Athletics", "weight_factor" :  0.00001}
     ],
     "sheets":
     [
         {"sheet" :{
             "day" : "Monday",
             "activities" : [
-                {"activity": "Athletics","cap" : 3},
+                {"activity": "Athletics","cap" : "no cap"},
                 {"activity": "Genius Grant","cap" : 8},
-                {"activity": "Student Support","cap" : "no cap"},
                 {"activity": "Serving Seniors","cap" : 14},
                 {"activity": "Cricut Crafts","cap" : 8},
-                {"activity": "Science Fair","cap" : "no cap"},
-                {"activity": "College Essays", "cap": 12},
-                {"activity": "SAT/ACT Prep", "cap": 15},
-                {"activity": "Ping Pong", "cap": 8}
+                {"activity": "STUCO","cap" : "no cap"},
+                {"activity": "Baseball/Softball","cap" : "no cap"},
+                {"activity": "Dungeons & Dragons","cap" : "no cap"},
+                {"activity": "Math Tutoring","cap" : "no cap"},
+                {"activity": "Table Tennis/Ping Pong", "cap": 8}
             ]
         }
         },
         {"sheet" : {
             "day" : "Tuesday",
             "activities" : [
-                {"activity": "Genius Grant","cap" : 8},
                 {"activity": "Athletics","cap" : "no cap"},
-                {"activity": "Wood Working", "cap": 8},
-                {"activity": "Robotics", "cap": "no cap"},
-                {"activity": "Graphic Signs", "cap": 10},
+                {"activity": "Genius Grant","cap" : 8},
+                {"activity": "Woodshop", "cap": 8},
+                {"activity": "Chess", "cap": "no cap"},
                 {"activity": "Praise Team", "cap": "no cap"},
-                {"activity": "Classic Vehicle Restoration", "cap": 8},
+                {"activity": "Baseball/Softball Training", "cap": 25},
+                {"activity": "Robotics", "cap": "no cap"},
+                {"activity": "Basketball Training", "cap": 25},
                 {"activity": "Morning Announcements", "cap": 4},
-                {"activity": "Basketball Training", "cap": 25}
-                ]
+                {"activity": "Masterclass", "cap": "no cap"}
+            ]
         }
         },
         {"sheet" : {
@@ -41,15 +41,17 @@
             "activities" : [
                 {"activity": "Athletics","cap" : "no cap"},
                 {"activity": "Genius Grant","cap" : 8},
-                {"activity": "Student Support","cap" : "no cap"},
                 {"activity": "Serving Seniors","cap" : 14},
                 {"activity": "Cricut Crafts","cap" : 8},
-                {"activity": "Science Fair","cap" : "no cap"},
-                {"activity": "Praise Team", "cap": "no cap"},
-                {"activity": "Theater Basics", "cap": "no cap"},
-                {"activity": "STUCO", "cap": "no cap"},
-                {"activity": "Yoga", "cap": 15}
-                ]
+                {"activity": "ESports","cap" : "no cap"},
+                {"activity": "Praise Team","cap" : "no cap"},
+                {"activity": "TAPPS Theater Arts Prep","cap" : "no cap"},
+                {"activity": "Pickleball","cap" : "no cap"},
+                {"activity": "Yoga", "cap": 15},
+                {"activity": "Crafts for Gifting","cap" : "no cap"},
+                {"activity": "Yearbook","cap" : 12},
+                {"activity": "Classic Vehicle Restoration", "cap": 8}
+            ]
         }
         },
         {"sheet" : {
@@ -57,13 +59,14 @@
             "activities" : [
                 {"activity": "Athletics","cap" : "no cap"},
                 {"activity": "Genius Grant","cap" : 8},
-                {"activity": "Wood Working", "cap": 8},
+                {"activity": "Woodshop", "cap": 8},
                 {"activity": "Robotics", "cap": "no cap"},
-                {"activity": "Morning Announcements", "cap": 4},
-                {"activity": "Journalism", "cap": 10},
-                {"activity": "Young Men's Discipleship", "cap": 12},
+                {"activity": "Writer's Workshop", "cap": "no cap"},
+                {"activity": "Intro to Guitar (BYOGuitar)", "cap": "no cap"},
+                {"activity": "Walking", "cap": "no cap"},
                 {"activity": "Basketball Training", "cap": 25},
-                {"activity": "Yearbook", "cap": 12}
+                {"activity": "Morning Announcements", "cap": 4},
+                {"activity": "Worktime for the Overscheduled", "cap": "no cap"}
             ]
         }
         }

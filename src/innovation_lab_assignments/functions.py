@@ -3,7 +3,7 @@ import os
 from innovation_lab_assignments.classes import *
 import logging
 
-def read_input_records(filename):
+def read_input_records(filename) ->[dict]:
     """
     Read input records from a CSV file.
     Args:
