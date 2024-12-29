@@ -27,7 +27,7 @@ def main():
     if len(config.json_data) == 0:
         return _die()
     # Create a list of Sheet_Rec from sheets data in config.json_data.
-    sheet_recs = [SheetRec(sheet_dict["sheet"]) for sheet_dict in config.json_data.get("sheets")]
+    sheet_recs = [SheetRec(sheet_dict["sheet"]) for sheet_dict in config.get_sheets()]
 
     for sheet_rec in sheet_recs:
         for priority in range(1, 4):

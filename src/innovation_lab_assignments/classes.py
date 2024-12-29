@@ -1,6 +1,8 @@
 import logging
 import sys
 from datetime import datetime
+from json import JSONDecodeError
+import json
 
 class SheetRec:
     """
@@ -229,17 +231,24 @@ class Config:
         self._log_me()
 
     def load_config(self):
+        """
+        Call load_config_with() self.config_json_name (set during parse_cmd_line_args()).
+        """
         from innovation_lab_assignments.functions import prepend_project_root_if_required
-        from json import JSONDecodeError
-        import json
-        """
-        Load sheets configuration from config_json_name JSON file into json_data.
-        """
         if not self._cmd_line_args_parsed:
             message = "parse_cmd_line_args() must be called first."
             logging.error(message)
             raise RuntimeError(message)
         filename = prepend_project_root_if_required(self.config_json_name, self.project_root)
+        self.load_config_with(filename)
+
+    def load_config_with(self, filename: str):
+        """
+        Load sheets configuration using passed filename JSON file into json_data.
+        Args:
+            filename (str)
+        """
+        self.config_json_name = filename
 
         try:
             with open(filename) as input_file:
@@ -248,6 +257,17 @@ class Config:
             logging.error("JSON config file with filename " + filename + " not found")
         except JSONDecodeError:
             logging.error("JSON config file" + filename + " contains invalid JSON")
+
+    def save_config(self):
+        """
+        Save sheets configuration using config_json_name.
+        """
+        try:
+            with open(self.config_json_name, "w") as output_file:
+                # noinspection PyTypeChecker
+                json.dump(self.json_data, output_file, indent=3)
+        except JSONDecodeError:
+            pass
 
     def get_weight_factor(self, activity_name) -> float:
         """
@@ -268,7 +288,15 @@ class Config:
         return self.weight_factor_dict.get(activity_name)
 
     def get_sheets(self) -> dict:
+        """
+        Returns: dict: The sheets part of the json_data.
+        """
         return self.json_data.get("sheets")
 
     def set_sheets(self, sheets_dict: dict):
+        """
+        Replaces the sheets part of the json_data with the passed sheets_dict.
+        Args:
+            sheets_dict (dict)
+        """
         self.json_data["sheets"] = sheets_dict

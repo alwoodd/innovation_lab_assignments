@@ -64,16 +64,14 @@ class ActivityWidgetsManager:
         self._activity_dict = {} #key: day, value: [ActivityWidget]
         self._initial_checksum = None
 
-    def init(self,sheets_dict_list: [dict]):
-        #If _initial_checksum is still None, then this is the first call to init().
-        #Otherwise do nothing.
-        if self._initial_checksum is None:
-            for sheet_dict in sheets_dict_list:
-                sheet_value = sheet_dict["sheet"]
-                activity_widgets = self._create_activity_list(sheet_value["activities"])
-                self._activity_dict[sheet_value["day"]] = activity_widgets
+    def load_sheets(self, sheets_dict_list: [dict]):
+        self._activity_dict.clear()
+        for sheet_dict in sheets_dict_list:
+            sheet_value = sheet_dict["sheet"]
+            activity_widgets = self._create_activity_list(sheet_value["activities"])
+            self._activity_dict[sheet_value["day"]] = activity_widgets
 
-            self._initial_checksum = self._calculate_checksum()
+        self._initial_checksum = self._calculate_checksum()
 
     @staticmethod
     def _create_activity_list(activities_dict_list) ->[ActivityWidget]:
@@ -120,19 +118,22 @@ class ActivityWidgetsManager:
         activity_widgets = self._activity_dict[day]
         return activity_widgets
 
-    def make_sheets_list(self) ->[]:
+    def make_sheets_list(self) ->[dict]:
         """
         Convert all the managed ActivityWidgets into a list of dicts.
         This list can be used to replace the sheets value of the config file.
-        Returns: list
+        Returns: [dict]
         """
         sheets_list = []
         for day in self._activity_dict.keys():
             activity_widgets = self.get_activity_widgets_for_day(day)
             activity_dict_list = []
             for activity_widget in activity_widgets:
+                #If no_cap_boolean_variable is True, cap_value is sys.maxsize.
+                #Otherwise, it is cap_variable.
+                cap_value = sys.maxsize if activity_widget.no_cap_boolean_variable.get() else activity_widget.cap_variable.get()
                 activity_dict_list.append({"activity": activity_widget.name_variable.get(),
-                                           "cap": activity_widget.cap_variable.get()})
+                                           "cap": cap_value})
 
             sheets_list.append({"sheet":
                                     {"day": day,
@@ -181,8 +182,13 @@ class ActivityWidgetsManager:
         Compares the current checksum to the initial checksum.
         Returns: (bool) True checksums differ, else False.
         """
-        current_check_sum = self._calculate_checksum()
-        return self._initial_checksum != current_check_sum
+        is_changed = False
+        #If _initial_checksum was never set, then assume not is_changed.
+        if self._initial_checksum is not None:
+            current_check_sum = self._calculate_checksum()
+            is_changed = self._initial_checksum != current_check_sum
+
+        return is_changed
 
 ###########################################################################
 
@@ -273,15 +279,21 @@ class ActivityWidgetRowManager:
             self.remove_row(row_key)
 
 class AppWidgetId(Enum):
+    """
+    This enum provides the keys used in AppWidgetStore.
+    Add keys as necessary.
+    """
     MAIN_WINDOW = auto()
-    ACTIVITIES_FRAME = auto
+    ACTIVITIES_FRAME = auto()
     DAY_COMBO = auto()
+    SAVE_BUTTON = auto()
+    ADD_ACTIVITY_BUTTON = auto()
 
 class AppWidgetStore:
     """
-    Singleton that manages all the existing ActivityWidgetRows.
-    New rows can be added with add_row()
-    Existing rows can be retrieved with get_row(), and removed with remove_row().
+    Singleton that manages all the existing AppWidgetStore.
+    Use add_widget() to add a widget to the store.
+    Use get_widget() to retrieve one.
     """
     _instance = None
     _is_initialize_allowed = False
