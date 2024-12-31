@@ -1,8 +1,8 @@
 # Get the path of the file from which this module was loaded.
-import os
+import pathlib
 import sys
 
-project_root  = os.path.dirname(os.path.abspath(__file__))
+project_root = str(pathlib.PurePath(__file__).parent)
 # Make sure it is part of sys.path
 if project_root not in sys.path:
     sys.path.append(project_root)

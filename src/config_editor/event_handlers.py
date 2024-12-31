@@ -38,6 +38,7 @@ def on_click_save():
     config = Config.get_instance()
     config.set_sheets(new_sheets_list)
     config.save_config()
+    ActivityWidgetsManager.get_instance().reset_is_widgets_changed()
 
 def on_click_exit():
     ok_exit = True

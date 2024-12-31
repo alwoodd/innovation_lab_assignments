@@ -76,6 +76,9 @@ CONFIG_EDITOR_CONFIG_FILE = "config_editor.json"
 def get_saved_config_filename() ->str:
     """
     Returns: str The name of the sheets json from CONFIG_EDITOR_CONFIG_FILE
+    If CONFIG_EDITOR_CONFIG_FILE cannot be found, or the sheets json does
+    not exist, "" is returned.
+    Returns: str
     """
     from innovation_lab_assignments.functions import prepend_project_root_if_required
     from json import JSONDecodeError
@@ -83,9 +86,7 @@ def get_saved_config_filename() ->str:
     config_file_name = "" #This is the file to use with Config.load_config_with().
     full_path = prepend_project_root_if_required(CONFIG_EDITOR_CONFIG_FILE,
                                                  Config.get_instance().project_root)
-    config_editor_path = Path(full_path)
-
-    if config_editor_path.exists():
+    if Path(full_path).exists():
         try:
             with open(full_path) as input_file:
                 config_file_content = json.load(input_file)
@@ -94,7 +95,7 @@ def get_saved_config_filename() ->str:
             return config_file_name
 
         config_file_name = config_file_content.get("config_file_name")
-        if config_file_name is None:
+        if config_file_name is None or not Path(config_file_name).exists():
             config_file_name = ""
 
     return config_file_name

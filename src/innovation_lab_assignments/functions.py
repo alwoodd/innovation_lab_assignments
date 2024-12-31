@@ -1,5 +1,6 @@
 import csv
-import os
+from pathlib import PurePath
+
 from innovation_lab_assignments.classes import *
 import logging
 
@@ -117,7 +118,8 @@ def prepend_project_root_if_required(filename: str, project_root: str) -> str:
     Returns:
         str: filename that already had a path, or filename with project_root for its path.
     """
-    if not os.path.isabs(filename):
-        filename = project_root + "\\" + filename
+    if not PurePath(filename).is_absolute():#os.path.isabs(filename):
+        filename = str(PurePath(project_root).joinpath(filename))
+        #filename = project_root + "\\" + filename
 
     return filename

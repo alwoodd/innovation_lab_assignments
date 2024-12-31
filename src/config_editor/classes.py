@@ -190,6 +190,12 @@ class ActivityWidgetsManager:
 
         return is_changed
 
+    def reset_is_widgets_changed(self):
+        """
+        Reset the initial checksum.
+        """
+        self._initial_checksum = self._calculate_checksum()
+
 ###########################################################################
 
 class ActivityWidgetRow:

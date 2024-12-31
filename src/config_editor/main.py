@@ -1,26 +1,27 @@
-from innovation_lab_assignments.classes import Config
 from config_editor.event_handlers import *
+from innovation_lab_assignments.functions import prepend_project_root_if_required
+from innovation_lab_assignments.classes import Config
 
 def main():
     app_widget_store = AppWidgetStore.get_instance()
 
     main_window = Tk()
-    main_window.title("Config Editor")
-    # TODO icon
-    # main_window.iconbitmap()
+    main_window.title("Innovation Lab Assignments Config Editor")
     app_widget_store.add_widget(main_window, AppWidgetId.MAIN_WINDOW)
 
-    day_frame = ttk.Frame(main_window, padding=20)#, relief=RIDGE)
+    icon_image_file = prepend_project_root_if_required("innovation lab icon.png", Config.get_instance().project_root)
+    icon = PhotoImage(file=icon_image_file)
+    main_window.wm_iconphoto(True, icon)
+
+    day_frame = ttk.Frame(main_window, padding=20)
     day_frame.grid(row=0, column=0, sticky=W+E)
 
     ttk.Button(day_frame, text="Load Config", command=on_click_load).grid(row=0, column=0, padx=15, sticky=W)
 
     ttk.Label(day_frame, text="Select Day:").grid(row=0, column=1, padx=5)
-    #days = activity_widget_manager.get_all_days()
     day_combo = ttk.Combobox(day_frame, state="disabled")
     day_combo.grid(row=0, column=2)
     day_combo.bind("<<ComboboxSelected>>", on_combo_select)
-    #day_combo.set(days[0])  # Select the first item in the list.
     app_widget_store.add_widget(day_combo, AppWidgetId.DAY_COMBO)
 
     activities_frame = ttk.Frame(main_window, padding=20)
