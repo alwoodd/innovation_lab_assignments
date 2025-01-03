@@ -74,8 +74,6 @@ class Student:
         self.first_name = student_dict["Type your first name"]
         self.last_name = student_dict["Type your last name"]
         self.in_athletics = True if student_dict["I am currently participating in at least one LHS sport."] == "Yes" else False
-        self.effort_agreement = True if student_dict["I understand that my participation and effort in the selections I have made will determine if I am able to stay in each offering."] == "I understand" else False
-        self.credit_agreement = True if student_dict["I understand that disciplinary issues could result in not receiving credit for Innovation Lab."] == "I understand" else False
         self.monday_choices =   [Choice(student_dict["Monday First Choice"], 1),
                                  Choice(student_dict["Monday Second Choice"], 2),
                                  Choice(student_dict["Monday Third Choice"], 3)]
@@ -210,6 +208,7 @@ class Config:
     config_filename = "c"
     def parse_cmd_line_args(self):
         import argparse
+        from innovation_lab_assignments.functions import prepend_project_root_if_required
         """
         Set up and uses argparse to get expected config info.
         """
@@ -225,7 +224,7 @@ class Config:
         args_dict = vars(args_namespace) #Convert to dict
         self.input_file_name = args_dict[Config.input_file_name]
         self.output_dir_name = args_dict[Config.output_dir_name]
-        self.config_json_name = args_dict[Config.config_filename]
+        self.config_json_name = prepend_project_root_if_required(args_dict[Config.config_filename], self.project_root)
 
         self._cmd_line_args_parsed = True
         self._log_me()
@@ -239,8 +238,7 @@ class Config:
             message = "parse_cmd_line_args() must be called first."
             logging.error(message)
             raise RuntimeError(message)
-        filename = prepend_project_root_if_required(self.config_json_name, self.project_root)
-        self.load_config_with(filename)
+        self.load_config_with(self.config_json_name)
 
     def load_config_with(self, filename: str):
         """
@@ -248,7 +246,7 @@ class Config:
         Args:
             filename (str)
         """
-        self.config_json_name = filename
+        self.config_json_name = filename #Just in case
 
         try:
             with open(filename) as input_file:

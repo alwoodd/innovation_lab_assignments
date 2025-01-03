@@ -1,3 +1,5 @@
+src/config_editor/*.json
+src/innovation_lab_assignments_ui/*.json
 .idea
 # Byte-compiled / optimized / DLL files
 src/__pycache__/

@@ -1,0 +1,4 @@
+exclude *.json
+include src/innovation_lab_assignments/daily_activities_config.json
+recursive-include * *.png
+exclude tests/*

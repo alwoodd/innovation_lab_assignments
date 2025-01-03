@@ -6,10 +6,10 @@ def _debug(message):
 _debug("STARTING __main__.py")
 
 import sys
-import os
+import pathlib
 
 # Get the path of the file from which this module was loaded.
-project_root  = os.path.dirname(os.path.abspath(__file__))
+project_root  = str(pathlib.PurePath(__file__).parent)
 # Make sure it is part of sys.path
 if project_root not in sys.path:
     sys.path.append(project_root)

@@ -1,6 +1,5 @@
 import csv
 from pathlib import PurePath
-
 from innovation_lab_assignments.classes import *
 import logging
 
@@ -16,13 +15,14 @@ def read_input_records(filename) ->[dict]:
     try:
         with open(filename, "r") as input_file:
             csv_reader = csv.DictReader(input_file)
-            stripped_fieldnames = []
-            #Iterate reader's fieldnames and strip off leading and trailing spaces.
-            for fieldname in csv_reader.fieldnames:
-                stripped_fieldnames.append(fieldname.strip())
-            csv_reader.fieldnames = stripped_fieldnames
+            if csv_reader.fieldnames is not None:
+                stripped_fieldnames = []
+                #Iterate reader's fieldnames and strip off leading and trailing spaces.
+                for fieldname in csv_reader.fieldnames:
+                    stripped_fieldnames.append(fieldname.strip())
+                csv_reader.fieldnames = stripped_fieldnames
 
-            input_records = [input_record for input_record in csv_reader]
+                input_records = [input_record for input_record in csv_reader]
     except FileNotFoundError:
         logging.error("Input records with filename " + filename + " not found")
 
@@ -120,6 +120,54 @@ def prepend_project_root_if_required(filename: str, project_root: str) -> str:
     """
     if not PurePath(filename).is_absolute():#os.path.isabs(filename):
         filename = str(PurePath(project_root).joinpath(filename))
-        #filename = project_root + "\\" + filename
 
     return filename
+
+def die():
+    logging.error("Unable to continue")
+    return 1
+
+def main_loop():
+    from innovation_lab_assignments.random_select import randomize_students
+    from innovation_lab_assignments.classes import Config
+    config = Config.get_instance()
+    success = 0
+
+    input_records_dict_list = read_input_records(config.input_file_name)
+    logging.info("%i records to process", len(input_records_dict_list))
+    if len(input_records_dict_list) == 0:
+        return die()
+
+    # Create a list of Student from input_records_dict_list. The student_id generated using enumerate().
+    students = [Student(student_dict, student_id) for student_id, student_dict in enumerate(input_records_dict_list, 1)]
+
+    # Create a list of Sheet_Rec from sheets data in config.json_data.
+    sheet_recs = [SheetRec(sheet_dict["sheet"]) for sheet_dict in config.get_sheets()]
+
+    for sheet_rec in sheet_recs:
+        for priority in range(1, 4):
+            for activity in sheet_rec.activities:
+                # If activity cap has not yet been reached...
+                if len(activity.students) < activity.cap:
+                    # Get all still-available students who want this activity at the current priority.
+                    student_candidates = students_with_activity_choice(students, activity, sheet_rec.day.lower(), priority)
+                    # If the number of student candidates exceeds the activity's remaining cap,
+                    # randomize_students() using the candidates, then select from that list up to the remaining cap value,
+                    # starting with beginning of the list.
+                    remaining_cap = activity.cap - len(activity.students)
+                    if len(student_candidates) > remaining_cap:
+                        student_candidates = randomize_students(student_candidates, activity)
+                        debug_log_randomized_students(student_candidates, sheet_rec.day, activity.name)
+                        # Use only the first student through the remaining cap.
+                        student_candidates = student_candidates[0: remaining_cap]
+
+                    activity.students.extend(student_candidates)
+                    mark_students_selected_for_day(student_candidates, sheet_rec.day.lower(), priority)
+
+    '''
+    Output a sheet CSV for every sheet_rec.
+    '''
+    for sheet_rec in sheet_recs:
+        write_output_sheet(sheet_rec, config.output_dir_name)
+
+    return success
