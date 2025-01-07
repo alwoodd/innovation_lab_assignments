@@ -62,8 +62,6 @@ class Student:
         first_name (str)
         last_name (str)
         in_athletics (bool)
-        effort_agreement (bool)
-        credit_agreement (bool)
         monday_choices ([Choice]): List of 3 choices
         tuesday_choices ([Choice]): List of 3 choices
         wednesday_choices ([Choice]): List of 3 choices
@@ -96,17 +94,17 @@ class Student:
             day_selections += f" day: {key}, priority: {self.day_selections[key]}"
         return f"name: {self.first_name} {self.last_name}, in athletics? {self.in_athletics} {day_selections}"
 
-    def set_selection_priority_for_day(self, priority, day):
+    def set_selection_priority_for_day(self, priority, day: str):
         """
         Mark at which priority the passed day was selected.
         """
-        self.day_selections[day] = priority
+        self.day_selections[day.lower()] = priority
 
-    def is_available_for_day(self, day):
+    def is_available_for_day(self, day: str):
         """
         Return True if the student has not yet been selected for the passed day.
         """
-        return True if self.day_selections[day] == 0 else False
+        return True if self.day_selections[day.lower()] == 0 else False
 
 class Choice:
     '''
@@ -123,30 +121,30 @@ class Choice:
         return f"name: {self.name}, priority: {self.priority}"
 
 class DictRowManager:
-    '''
+    """
     Each instance manages a list rows, and creates rows as needed.
     Each row is a dict whose keys come from a list of field names pass in the constructor.
-    '''
+    """
     def __init__(self, row_fields: [str]):
         self._row_fields = row_fields
         self._rows = []
 
     def _generate_row(self) -> dict:
-        '''
+        """
         Create a dict using _row_fields as its keys.
-        '''
+        """
         row_dict = dict.fromkeys(self._row_fields)
         return row_dict
 
     def get_row(self, index):
-        '''
+        """
         Return the row at the passed index from the managed list of rows.
         If the row does not yet exist, first _generate_row(), add it to the list
         of rows.
         Args:
             index (int)
         Returns: [dict] Requested row as a dict
-        '''
+        """
         if len(self._rows) <= index:
             row_dict = self._generate_row()
             self._rows.append(row_dict)
@@ -154,9 +152,9 @@ class DictRowManager:
         return self._rows[index]
 
     def get_all_rows(self):
-        '''
+        """
         Return the managed list of rows.
-        '''
+        """
         return self._rows
 
 class Config:

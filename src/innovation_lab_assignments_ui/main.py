@@ -1,14 +1,21 @@
 from tkinter import *
 from tkinter import ttk
+from my_utilities import init_log
+import logging
 from innovation_lab_assignments_ui.event_handlers import *
 from innovation_lab_assignments_ui.functions import *
 from innovation_lab_assignments.functions import prepend_project_root_if_required
 from innovation_lab_assignments.classes import Config
 
+log_file_name = "innovation_lab_assignment_ui.log"
+
 def main():
+    project_root = Config.get_instance().project_root
+    init_log(prepend_project_root_if_required(log_file_name, project_root), logging_level=logging.DEBUG, truncate_log=True)
+
     main_window = get_main_window()
     main_window.title("Innovation Lab Assignments")
-    icon_image_file = prepend_project_root_if_required("innovation lab icon.png", Config.get_instance().project_root)
+    icon_image_file = prepend_project_root_if_required("innovation lab icon.png", project_root)
     icon = PhotoImage(file=icon_image_file)
     main_window.wm_iconphoto(True, icon)
     main_window.grid_rowconfigure([0,2], weight=1, minsize=50)

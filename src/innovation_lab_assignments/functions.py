@@ -54,7 +54,7 @@ def students_with_activity_choice(students, activity_choice, day, priority) -> [
         if student.is_available_for_day(day):
             # Filter all the student's choices for the day to just the passed in activity choice.
             # This filtered list may be empty (len == 0).
-            all_student_choices = getattr(student, day + "_choices")
+            all_student_choices = getattr(student, day.lower() + "_choices")
             student_day_choices = list(filter(choice_filter, all_student_choices))
             # If this student chose this activity, append to student_candidates.
             if len(student_day_choices) > 0:
@@ -69,7 +69,7 @@ def mark_students_selected_for_day(student_candidates, day, priority):
     for student in student_candidates:
         student.set_selection_priority_for_day(priority, day)
 
-def activities_to_rows(activities, dict_row_manager):
+def activities_to_rows(activities, dict_row_manager: DictRowManager):
     """
     For all the passed activities, for each of their respective students,
     populate each of the activity's students using the passed dict_row_manager.
@@ -105,11 +105,84 @@ def write_output_sheet(sheet_rec: SheetRec, output_dir: str):
         csv_writer.writeheader()
         csv_writer.writerows(dict_row_manager.get_all_rows())
 
-def debug_log_randomized_students(students: [Student], day, activity):
-    logging.debug("Randomized students for " + day + ", " + activity + ":")
-    for student in students:
-        logging.debug(student.first_name + ", " + student.last_name + "\t" + str(student.timestamp))
+def build_days_dict_row_manager(students: [Student], days)-> DictRowManager:
+    """
+    Create and return a DictRowManager whose keys are days, and rows are
+    student that is still available for a given day.
+    Args:
+        students ([Student]): Students to be considered.
+        days ([str]): days to check for available students.
+    Returns:
+        DictRowManager
+    """
+    dict_row_manager = DictRowManager(days)
 
+    for day in days:
+        i = 0
+        for student in students:
+            if student.is_available_for_day(day):
+                row_dict = dict_row_manager.get_row(i)
+                row_dict[day] = student.first_name + " " + student.last_name
+                i += 1
+
+    return dict_row_manager
+
+def write_require_manual_assignment(students: [Student], days, output_dir:str):
+    """
+    Write a CSV with students that are still available for each day.
+    Args:
+         students ([Student]): Students to be considered.
+         days ([str]): CSV headings
+         output_dir (str): Directory name to prepend to csv name.
+    """
+    csv_name = output_dir + "/require_manual_assignment.csv"
+    dict_row_manager = build_days_dict_row_manager(students, days)
+
+    with open(csv_name, "w", newline="") as csv_file:
+        # noinspection PyTypeChecker
+        csv_writer = csv.DictWriter(csv_file, days)
+        csv_writer.writeheader()
+        csv_writer.writerows(dict_row_manager.get_all_rows())
+
+def debug_log_unselected_students(students: [Student], day, priority):
+    logging.debug("Students still unselected for " + day + " after assigning priority " + str(priority) + " activities:")
+    for student in students:
+        if student.is_available_for_day(day):
+            logging.debug(student.first_name + " " + student.last_name)
+
+def cap_student_candidates(students: [Student], remaining_cap, day, priority, activity) ->[Student]:
+    """
+    From a passed list of randomized students, returns a list of students no longer then the remaining_cap.
+    Also logs all of the passed randomized students, indicating which survived by making the cut.
+    Args:
+        students ([Student]): Randomized students
+        remaining_cap (int): How many of the students that make the cut
+        day (str): day for logging
+        priority (int): priority for logging
+        activity (str): activity name for logging
+    Returns:
+        [Student] surviving_students
+    """
+    # Inner function to do the logging.
+    def _debug_log_randomized_students():
+        logging.debug("Randomized students for " + day + ", priority " + str(priority) + ", " + activity + " (* indicates selected students:)")
+        for student, indicator in students_with_indicator:
+            logging.debug(student.first_name + " " + student.last_name + indicator + "\t\t" + str(student.timestamp))
+
+    # Create list of students plus an initially empty indicator.
+    students_with_indicator = [[student, ""] for student in students]
+    # Cap-off the students list.
+    surviving_students = students[0: remaining_cap]
+
+    # Update the indicator for the surviving students with an "*".
+    for i in range(len(surviving_students)):
+        students_with_indicator[i][1] = "*"
+
+    _debug_log_randomized_students()
+
+    return surviving_students
+
+#TODO Change to NOT pass in project_root.
 def prepend_project_root_if_required(filename: str, project_root: str) -> str:
     """
     If filename does not have the full path name, prepend project_root to it.
@@ -138,7 +211,7 @@ def main_loop():
     if len(input_records_dict_list) == 0:
         return die()
 
-    # Create a list of Student from input_records_dict_list. The student_id generated using enumerate().
+    # Create a list of Student from input_records_dict_list. The student_id is generated using enumerate().
     students = [Student(student_dict, student_id) for student_id, student_dict in enumerate(input_records_dict_list, 1)]
 
     # Create a list of Sheet_Rec from sheets data in config.json_data.
@@ -150,24 +223,31 @@ def main_loop():
                 # If activity cap has not yet been reached...
                 if len(activity.students) < activity.cap:
                     # Get all still-available students who want this activity at the current priority.
-                    student_candidates = students_with_activity_choice(students, activity, sheet_rec.day.lower(), priority)
+                    student_candidates = students_with_activity_choice(students, activity, sheet_rec.day, priority)
                     # If the number of student candidates exceeds the activity's remaining cap,
                     # randomize_students() using the candidates, then select from that list up to the remaining cap value,
                     # starting with beginning of the list.
                     remaining_cap = activity.cap - len(activity.students)
                     if len(student_candidates) > remaining_cap:
                         student_candidates = randomize_students(student_candidates, activity)
-                        debug_log_randomized_students(student_candidates, sheet_rec.day, activity.name)
                         # Use only the first student through the remaining cap.
-                        student_candidates = student_candidates[0: remaining_cap]
+                        student_candidates = cap_student_candidates(student_candidates, remaining_cap, sheet_rec.day, priority, activity.name)
 
                     activity.students.extend(student_candidates)
-                    mark_students_selected_for_day(student_candidates, sheet_rec.day.lower(), priority)
+                    mark_students_selected_for_day(student_candidates, sheet_rec.day, priority)
+
+            debug_log_unselected_students(students, sheet_rec.day, priority)
 
     '''
     Output a sheet CSV for every sheet_rec.
     '''
     for sheet_rec in sheet_recs:
         write_output_sheet(sheet_rec, config.output_dir_name)
+
+    '''
+    Write CSV with students not selected for any activities by day.
+    '''
+    days = [sheet_rec.day for sheet_rec in sheet_recs ]
+    write_require_manual_assignment(students, days, config.output_dir_name)
 
     return success
