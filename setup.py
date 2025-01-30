@@ -1,7 +1,7 @@
 from setuptools import setup
 setup(
     name='innovation_lab_assignments',
-    version='2.1.0',
+    version='2.1.1',
     author='Dan Alwood',
     author_email='dalwood@yahoo.com',
     description='Generate innovation lab sheets from Google Forms data',

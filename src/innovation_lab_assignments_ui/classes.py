@@ -7,7 +7,7 @@ class RunConfig:
     Members are StringVars that hold all the config values,
     and are bound to their respective Labels.
     """
-    def __init__(self, config_content_dict: dict):#input_csv, output_dir, daily_activities_config_file="daily_activities_config.json"):
+    def __init__(self, config_content_dict: dict):
         self.input_csv = StringVar()
         self.output_dir = StringVar()
         self.daily_activities_config_file = StringVar()
@@ -32,7 +32,7 @@ class RunConfig:
 
     def is_valid(self) ->bool:
         """
-        Returns: bool: False if any of the StringVar members have "", other True
+        Returns: bool: False if any of the StringVar members have "", otherwise True
         :return:
         :rtype:
         """

@@ -131,7 +131,7 @@ class ActivityWidgetsManager:
             for activity_widget in activity_widgets:
                 #If no_cap_boolean_variable is True, cap_value is sys.maxsize.
                 #Otherwise, it is cap_variable.
-                cap_value = sys.maxsize if activity_widget.no_cap_boolean_variable.get() else activity_widget.cap_variable.get()
+                cap_value = "no cap" if activity_widget.no_cap_boolean_variable.get() else activity_widget.cap_variable.get()
                 activity_dict_list.append({"activity": activity_widget.name_variable.get(),
                                            "cap": cap_value})
 
